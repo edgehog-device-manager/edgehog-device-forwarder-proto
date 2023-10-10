@@ -1,3 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: edgehog-device-forwarder-proto
 Source: https://github.com/edgehog-device-manager/edgehog-device-forwarder-proto
+
+Files: out/* rust/Cargo.lock rust/edgehog-device-forwarder-proto/src/proto.rs
+Copyright: 2023 SECO Mind Srl
+License: Apache-2.0

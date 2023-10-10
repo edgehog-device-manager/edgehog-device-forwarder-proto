@@ -1,0 +1,29 @@
+# Copyright 2023 SECO Mind Srl
+# SPDX-License-Identifier: Apache-2.0
+
+name: commit-codegen
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    name: Commit and push generated code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download rust proto
+        uses: actions/download-artifact@v3
+        id: download-rust
+        with:
+          name: rust-proto
+      - name: Move rust proto to src
+        run: |
+          mv -v '${{steps.download-rust.outputs.download-path}}/edgehog.device.forwarder.rs' \
+            rust/edgehog-device-forwarder-proto/src/proto.rs
+      - name: Commit the generated code
+        run: .github/workflows/scripts/commit.sh

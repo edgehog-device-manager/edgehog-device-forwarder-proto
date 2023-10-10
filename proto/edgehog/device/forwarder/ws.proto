@@ -1,0 +1,23 @@
+// Copyright 2023 SECO Mind Srl
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package edgehog.device.forwarder;
+
+message WebSocket {
+    bytes socket_id = 1;
+
+    oneof message {
+        string text = 2;
+        bytes binary = 3;
+        bytes ping = 4;
+        bytes pong = 5;
+        Close close = 6;
+    }
+
+    message Close {
+        uint32 code = 1;
+        string reason = 2;
+    }
+}

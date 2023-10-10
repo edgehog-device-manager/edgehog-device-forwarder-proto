@@ -1,0 +1,153 @@
+# Copyright 2023 SECO Mind Srl
+# SPDX-License-Identifier: Apache-2.0
+
+name: check
+permissions:
+  contents: read
+on:
+  workflow_call:
+env:
+  CARGO_TERM_COLOR: always
+defaults:
+  run:
+    working-directory: rust
+jobs:
+  fmt:
+    name: stable / fmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --check
+  clippy:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.toolchain }} / clippy
+    permissions:
+      contents: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [ stable, beta ]
+    steps:
+      - uses: actions/checkout@v4
+      # Download proto artifact
+      - uses: actions/download-artifact@v3
+        id: download-proto
+        with:
+          name: rust-proto
+      - name: Move proto to src
+        run: |
+          mv -v '${{steps.download-proto.outputs.download-path}}/edgehog.device.forwarder.rs' \
+            edgehog-device-forwarder-proto/src/proto.rs
+      ##
+      - name: Install ${{ matrix.toolchain }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
+      - name: cargo clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --manifest-path rust/Cargo.toml --all-targets --all-features -- -D warnings
+  doc:
+    runs-on: ubuntu-latest
+    name: nightly / doc
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+      # Download proto artifact
+      - uses: actions/download-artifact@v3
+        id: download-proto
+        with:
+          name: rust-proto
+      - name: Move proto to src
+        run: |
+          mv -v ${{steps.download-proto.outputs.download-path}}/edgehog.device.forwarder.rs \
+            edgehog-device-forwarder-proto/src/proto.rs
+      ##
+      - name: cargo doc
+        run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: --cfg docsrs -D warnings
+  hack:
+    runs-on: ubuntu-latest
+    name: ubuntu / stable / features
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: cargo install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+      # Download proto artifact
+      - uses: actions/download-artifact@v3
+        id: download-proto
+        with:
+          name: rust-proto
+      - name: Move proto to src
+        run: |
+          mv -v '${{steps.download-proto.outputs.download-path}}/edgehog.device.forwarder.rs' \
+            edgehog-device-forwarder-proto/src/proto.rs
+      # intentionally no target specifier; see https://github.com/jonhoo/rust-ci-conf/pull/4
+      - name: cargo hack
+        run: cargo hack --feature-powerset check
+  minimal-versions:
+    runs-on: ubuntu-latest
+    name: ubuntu / nightly / minimal-versions
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: cargo install cargo-hack
+        uses: taiki-e/install-action@cargo-hack
+      - name: remove dev-deps
+        run: cargo hack --remove-dev-deps
+      - name: update to minimal deps
+        run: cargo update -Z direct-minimal-versions
+      # Download proto artifact
+      - uses: actions/download-artifact@v3
+        id: download-proto
+        with:
+          name: rust-proto
+      - name: Move proto to src
+        run: |
+          mv -v '${{steps.download-proto.outputs.download-path}}/edgehog.device.forwarder.rs' \
+            edgehog-device-forwarder-proto/src/proto.rs
+      ##
+      - name: cargo check
+        run: cargo check --all-features
+        env:
+          RUSTDOCFLAGS: -D warnings
+  msrv:
+    runs-on: ubuntu-latest
+    # we use a matrix here just because env can't be used in job names
+    # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+    strategy:
+      matrix:
+        msrv: [ 1.66.1 ]
+    name: ubuntu / ${{ matrix.msrv }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ${{ matrix.msrv }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.msrv }}
+      # Download proto artifact
+      - uses: actions/download-artifact@v3
+        id: download-proto
+        with:
+          name: rust-proto
+      - name: Move proto to src
+        run: |
+          mv -v '${{steps.download-proto.outputs.download-path}}/edgehog.device.forwarder.rs' \
+            edgehog-device-forwarder-proto/src/proto.rs
+      ##
+      - name: cargo +${{ matrix.msrv }} check
+        run: cargo check --all-features --package edgehog-device-forwarder-proto

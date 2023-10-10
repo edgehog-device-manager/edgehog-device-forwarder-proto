@@ -1,0 +1,33 @@
+# Copyright 2023 SECO Mind Srl
+# SPDX-License-Identifier: Apache-2.0
+
+name: rust-codegen
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          # Don't send the diagnostics automatically
+          diagnostic-endpoint: ""
+      - name: Generate Rust code
+        run: nix build -L .#rust
+      - name: Upload generated code
+        uses: actions/upload-artifact@v3
+        with:
+          name: rust-proto
+          path: result/

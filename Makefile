@@ -26,7 +26,6 @@ CANONICAL_O := $(shell mkdir -p $(O) >/dev/null 2>&1)$(realpath $(O))
 CANONICAL_CURDIR = $(realpath $(CURDIR))
 
 PROTO_DIR = $(CANONICAL_CURDIR)/proto
-RUST_LANG_DIR = $(CANONICAL_CURDIR)/rust
 ELIXIR_LANG_DIR = $(CANONICAL_CURDIR)/elixir
 ELIXIR_LANG_LIB=$(ELIXIR_LANG_DIR)/edgehog_device_forwarder_proto/lib/edgehog_device_forwarder_proto
 
@@ -34,17 +33,12 @@ BASE_DIR := $(CANONICAL_O)
 $(if $(BASE_DIR),, $(error output directory "$(O)" does not exist))
 
 BUILD_DIR := $(BASE_DIR)/build
-RUST_BUILD_DIR := $(BUILD_DIR)/rust
 ELIXIR_BUILD_DIR := $(BUILD_DIR)/elixir
 
 FILES=$(wildcard $(PROTO_DIR)/edgehog/device/forwarder/*.proto)
 
 PROTOC_CHECK_SCRIPT=$(CANONICAL_CURDIR)/scripts/protoc_check.sh
 ELIXIR_DEPS_CHECK_SCRIPT=$(CANONICAL_CURDIR)/scripts/elixir_deps_check.sh
-
-RUST_LANG=$(RUST_BUILD_DIR)/proto.rs
-RUST_FILES=$(shell find "$(RUST_LANG_DIR)/rust-codegen" -type f -regex '.*(rs|Cargo.toml|Cargo.lock)$$') \
-	$(RUST_LANG_DIR)/Cargo.toml $(RUST_LANG_DIR)/Cargo.lock
 
 ELIXIR_LANG=$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/http.pb.ex \
 	$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/ws.pb.ex \
@@ -53,10 +47,10 @@ ELIXIR_FILES="$(ELIXIR_LANG_LIB)/edgehog/device/forwarder/"{http,ws,message}.pb.
 
 # This is our default rule, so must come first
 .PHONY: all
-all: rust elixir
+all: elixir
 
 .PHONY: install
-install: rust-install elixir-install
+install: elixir-install
 
 .PHONY: clean
 clean:
@@ -65,20 +59,6 @@ clean:
 .PHONY: protoc-check
 protoc-check: $(PROTOC_CHECK_SCRIPT)
 	$(PROTOC_CHECK_SCRIPT)
-
-.PHONY: rust
-rust: protoc-check $(RUST_LANG)
-
-$(RUST_LANG): $(FILES) $(RUST_FILES)
-	cargo run --manifest-path "$(RUST_LANG_DIR)"/Cargo.toml -p rust-codegen -- -w "$(PROTO_DIR)" -o "$(RUST_BUILD_DIR)"
-
-.PHONY: rust-install
-rust-install: rust
-	install -m 664 "$(RUST_BUILD_DIR)/edgehog.device.forwarder.rs" "$(RUST_LANG_DIR)/edgehog-device-forwarder-proto/src/proto.rs"
-
-.PHONY: rust-dirclean
-rust-dirclean:
-	rm -rf $(RUST_BUILD_DIR)
 
 $(ELIXIR_LANG) &: $(FILES)
 	mkdir -p $(ELIXIR_BUILD_DIR)

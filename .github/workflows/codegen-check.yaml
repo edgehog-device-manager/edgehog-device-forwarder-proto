@@ -12,7 +12,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   PB_REL: https://github.com/protocolbuffers/protobuf/releases
-  PB_VERSION: 26.1
+  PB_VERSION: 35.1
 
 jobs:
   check:
@@ -24,8 +24,6 @@ jobs:
           curl -LO "$PB_REL/download/v$PB_VERSION/protoc-$PB_VERSION-linux-x86_64.zip"
           unzip "protoc-$PB_VERSION-linux-x86_64.zip" -d "$HOME/.local"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Install rust toolchain
-        uses: dtolnay/rust-toolchain@stable
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "26"

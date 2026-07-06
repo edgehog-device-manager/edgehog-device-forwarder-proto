@@ -1,0 +1,17 @@
+// Copyright 2026 SECO Mind Srl
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+
+package edgehog.device.forwarder;
+
+import "edgehog/device/forwarder/http.proto";
+
+message Https {
+  bytes request_id = 1;
+
+  oneof message {
+    Http.Request request = 3;
+    Http.Response response = 4;
+  }
+}

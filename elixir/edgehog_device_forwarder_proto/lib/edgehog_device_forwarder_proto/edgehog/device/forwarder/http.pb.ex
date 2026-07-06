@@ -24,6 +24,7 @@ defmodule EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Http.Request do
 
   field(:body, 5, type: :bytes)
   field(:port, 6, type: :uint32)
+  field(:host, 7, proto3_optional: true, type: :string)
 end
 
 defmodule EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Http.Response.HeadersEntry do

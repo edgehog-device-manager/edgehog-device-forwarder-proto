@@ -42,8 +42,9 @@ ELIXIR_DEPS_CHECK_SCRIPT=$(CANONICAL_CURDIR)/scripts/elixir_deps_check.sh
 
 ELIXIR_LANG=$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/http.pb.ex \
 	$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/ws.pb.ex \
-	$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/message.pb.ex
-ELIXIR_FILES="$(ELIXIR_LANG_LIB)/edgehog/device/forwarder/"{http,ws,message}.pb.ex
+	$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/message.pb.ex \
+	$(ELIXIR_BUILD_DIR)/edgehog/device/forwarder/https.pb.ex
+ELIXIR_FILES="$(ELIXIR_LANG_LIB)/edgehog/device/forwarder/"{http,https,ws,message}.pb.ex
 
 # This is our default rule, so must come first
 .PHONY: all

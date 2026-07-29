@@ -7,4 +7,5 @@ defmodule EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Message do
 
   field(:http, 1, type: EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Http, oneof: 0)
   field(:ws, 2, type: EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.WebSocket, oneof: 0)
+  field(:https, 3, type: EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Https, oneof: 0)
 end

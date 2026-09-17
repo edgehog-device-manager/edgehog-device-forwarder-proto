@@ -21,6 +21,7 @@ message Http {
     bytes body = 5;
     uint32 port = 6;
     optional string host = 7;
+    bool insecure = 8;
   }
 
   message Response {

@@ -12,7 +12,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   PB_REL: https://github.com/protocolbuffers/protobuf/releases
-  PB_VERSION: 35.1
+  PB_VERSION: 36.1
 
 jobs:
   check:

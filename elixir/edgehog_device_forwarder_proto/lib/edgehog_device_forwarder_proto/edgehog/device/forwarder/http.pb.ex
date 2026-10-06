@@ -25,6 +25,7 @@ defmodule EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Http.Request do
   field(:body, 5, type: :bytes)
   field(:port, 6, type: :uint32)
   field(:host, 7, proto3_optional: true, type: :string)
+  field(:insecure_tls_config, 8, type: :bool, json_name: "insecureTlsConfig")
 end
 
 defmodule EdgehogDeviceForwarderProto.Edgehog.Device.Forwarder.Http.Response.HeadersEntry do
